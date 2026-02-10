@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema Profissional de Reservas</title>
+
+  <!-- CSS SIMPLES E EXPLICADO -->
+  <style>
+
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+
+    body{background:#f4f4f4;color:#333}
+
+    header{background:#8b0000;color:#fff;padding:20px;text-align:center}
+
+    .container{max-width:1200px;margin:20px auto;padding:20px}
+
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+
+    .card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+
+    form{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+
+    input,select,textarea{padding:10px;border-radius:8px;border:1px solid #ccc;width:100%}
+
+    textarea{resize:none}
+
+    .full{grid-column:1/-1}
+
+    button{background:#8b0000;color:#fff;border:none;padding:12px;border-radius:8px;cursor:pointer}
+
+    .whatsapp{background:#25D366}
+
+    .danger{background:#444}
+
+    .mesa{padding:10px;border-radius:8px;margin:5px;display:inline-block;background:#e9e9e9}
+
+    .ocupada{background:#ffb3b3}
+
+    @media(max-width:768px){.grid{grid-template-columns:1fr}form{grid-template-columns:1fr}}
+
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Restaurante Sabor & Arte</h1>
+  <p>Sistema profissional de reservas</p>
+</header>
+
+<div class="container">
+
+  <!-- LOGIN ADMINISTRADORES -->
+  <div class="card" id="loginCard">
+    <h2>Login Administrador</h2>
+    <p>Pode haver vários administradores com utilizador e senha diferentes</p>
+    <input type="text" id="user" placeholder="Usuário" />
+    <input type="password" id="pass" placeholder="Senha" />
+    <button onclick="login()">Entrar</button>
+  </div>
+
+  <!-- SISTEMA -->
+  <div id="sistema" style="display:none">
+
+    <div class="grid">
+
+      <!-- FORMULÁRIO -->
+      <div class="card">
+        <h2>Nova Reserva</h2>
+        <form id="formReserva">
+          <input type="text" id="nome" placeholder="Nome" required />
+          <input type="tel" id="telefone" placeholder="Telefone" required />
+          <input type="date" id="data" required />
+          <input type="time" id="hora" required />
+
+          <select id="pessoas">
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5+</option>
+          </select>
+
+          <select id="mesa">
+            <option value="Mesa 1">Mesa 1</option>
+            <option value="Mesa 2">Mesa 2</option>
+            <option value="Mesa 3">Mesa 3</option>
+            <option value="Mesa 4">Mesa 4</option>
+            <option value="Mesa 5">Mesa 5</option>
+          </select>
+
+          <textarea id="obs" class="full" placeholder="Observações"></textarea>
+
+          <button class="full">Salvar Reserva</button>
+          <button type="button" class="whatsapp full" onclick="confirmarWhatsApp()">Confirmar por WhatsApp</button>
+        </form>
+      </div>
+
+      <!-- MESAS -->
+      <div class="card">
+        <h2>Mesas Disponíveis</h2>
+        <div id="mesas"></div>
+      </div>
+
+      <!-- PAINEL -->
+      <div class="card full">
+        <h2>Reservas</h2>
+        <div id="listaReservas"></div>
+        <button class="danger" onclick="limparReservas()">Apagar tudo</button>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+// ==============================
+// LISTA DE ADMINISTRADORES
+// Pode adicionar quantos quiser
+// ==============================
+
+const administradores = [
+  {user:'admin', pass:'1234'},
+  {user:'gerente', pass:'0000'},
+  {user:'dono', pass:'2026'}
+];
+
+// ==============================
+// LOGIN
+// ==============================
+
+function login(){
+
+  const usuario = user.value;
+  const senha = pass.value;
+
+  // verifica se existe um admin com esse user e senha
+  const autorizado = administradores.find(a => a.user === usuario && a.pass === senha);
+
+  if(autorizado){
+    loginCard.style.display='none';
+    sistema.style.display='block';
+  }else{
+    alert('Login inválido');
+  }
+}
+
+// ==============================
+// RESERVAS LOCAL
+// ==============================
+
+let reservas = JSON.parse(localStorage.getItem('reservas')) || [];
+
+function salvar(){
+  localStorage.setItem('reservas', JSON.stringify(reservas));
+}
+
+// ==============================
+// MESAS
+// ==============================
+
+function renderMesas(){
+  const div = document.getElementById('mesas');
+  div.innerHTML='';
+
+  ['Mesa 1','Mesa 2','Mesa 3','Mesa 4','Mesa 5'].forEach(m=>{
+    const ocupado = reservas.find(r=>r.mesa===m);
+    const el=document.createElement('div');
+    el.className='mesa '+(ocupado?'ocupada':'');
+    el.innerText=m+(ocupado?' (ocupada)':'');
+    div.appendChild(el);
+  });
+}
+
+// ==============================
+// NOVA RESERVA
+// ==============================
+
+formReserva.addEventListener('submit',e=>{
+  e.preventDefault();
+
+  const r={
+    nome:nome.value,
+    telefone:telefone.value,
+    data:data.value,
+    hora:hora.value,
+    pessoas:pessoas.value,
+    mesa:mesa.value,
+    obs:obs.value
+  };
+
+  reservas.push(r);
+  salvar();
+  render();
+  renderMesas();
+  formReserva.reset();
+});
+
+// ==============================
+// LISTAR
+// ==============================
+
+function render(){
+  listaReservas.innerHTML='';
+  reservas.forEach((r,i)=>{
+    listaReservas.innerHTML+=`
+      <div class='mesa'>
+        <b>${r.nome}</b> - ${r.mesa}<br>
+        ${r.data} ${r.hora}<br>
+        ${r.telefone}<br>
+        <button onclick='remover(${i})'>remover</button>
+      </div>`;
+  });
+}
+
+function remover(i){
+  reservas.splice(i,1);
+  salvar();
+  render();
+  renderMesas();
+}
+
+function limparReservas(){
+  reservas=[];
+  salvar();
+  render();
+  renderMesas();
+}
+
+// ==============================
+// WHATSAPP
+// ==============================
+
+function confirmarWhatsApp(){
+  const msg=`Confirmação de reserva:%0A
+Nome: ${nome.value}%0A
+Mesa: ${mesa.value}%0A
+Data: ${data.value}%0AHora: ${hora.value}`;
+  window.open(`https://wa.me/${telefone.value}?text=${msg}`);
+}
+
+render();
+renderMesas();
+
+</script>
+
+</body>
+</html>
