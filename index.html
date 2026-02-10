@@ -4,43 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sistema Profissional de Reservas</title>
+  <link rel="stylesheet" href="estilo/style.css">
 
-  <!-- CSS SIMPLES E EXPLICADO -->
-  <style>
-
-    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
-
-    body{background:#f4f4f4;color:#333}
-
-    header{background:#8b0000;color:#fff;padding:20px;text-align:center}
-
-    .container{max-width:1200px;margin:20px auto;padding:20px}
-
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-
-    .card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
-
-    form{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-
-    input,select,textarea{padding:10px;border-radius:8px;border:1px solid #ccc;width:100%}
-
-    textarea{resize:none}
-
-    .full{grid-column:1/-1}
-
-    button{background:#8b0000;color:#fff;border:none;padding:12px;border-radius:8px;cursor:pointer}
-
-    .whatsapp{background:#25D366}
-
-    .danger{background:#444}
-
-    .mesa{padding:10px;border-radius:8px;margin:5px;display:inline-block;background:#e9e9e9}
-
-    .ocupada{background:#ffb3b3}
-
-    @media(max-width:768px){.grid{grid-template-columns:1fr}form{grid-template-columns:1fr}}
-
-  </style>
 </head>
 <body>
 
@@ -93,7 +58,6 @@
           <textarea id="obs" class="full" placeholder="Observações"></textarea>
 
           <button class="full">Salvar Reserva</button>
-          <button type="button" class="whatsapp full" onclick="confirmarWhatsApp()">Confirmar por WhatsApp</button>
         </form>
       </div>
 
@@ -120,27 +84,21 @@
 
 // ==============================
 // LISTA DE ADMINISTRADORES
-// Pode adicionar quantos quiser
 // ==============================
-
 const administradores = [
   {user:'admin', pass:'1234'},
   {user:'gerente', pass:'0000'},
-  {user:'dono', pass:'2026'}
+  {user:'dono', pass:'2026'},
+  {user:'amaral', pass:'2005'}
 ];
 
 // ==============================
 // LOGIN
 // ==============================
-
 function login(){
-
   const usuario = user.value;
   const senha = pass.value;
-
-  // verifica se existe um admin com esse user e senha
   const autorizado = administradores.find(a => a.user === usuario && a.pass === senha);
-
   if(autorizado){
     loginCard.style.display='none';
     sistema.style.display='block';
@@ -152,21 +110,15 @@ function login(){
 // ==============================
 // RESERVAS LOCAL
 // ==============================
-
 let reservas = JSON.parse(localStorage.getItem('reservas')) || [];
-
-function salvar(){
-  localStorage.setItem('reservas', JSON.stringify(reservas));
-}
+function salvar(){ localStorage.setItem('reservas', JSON.stringify(reservas)); }
 
 // ==============================
 // MESAS
 // ==============================
-
 function renderMesas(){
   const div = document.getElementById('mesas');
   div.innerHTML='';
-
   ['Mesa 1','Mesa 2','Mesa 3','Mesa 4','Mesa 5'].forEach(m=>{
     const ocupado = reservas.find(r=>r.mesa===m);
     const el=document.createElement('div');
@@ -179,10 +131,8 @@ function renderMesas(){
 // ==============================
 // NOVA RESERVA
 // ==============================
-
 formReserva.addEventListener('submit',e=>{
   e.preventDefault();
-
   const r={
     nome:nome.value,
     telefone:telefone.value,
@@ -192,7 +142,6 @@ formReserva.addEventListener('submit',e=>{
     mesa:mesa.value,
     obs:obs.value
   };
-
   reservas.push(r);
   salvar();
   render();
@@ -201,9 +150,8 @@ formReserva.addEventListener('submit',e=>{
 });
 
 // ==============================
-// LISTAR
+// LISTAR RESERVAS COM BOTÃO WHATSAPP
 // ==============================
-
 function render(){
   listaReservas.innerHTML='';
   reservas.forEach((r,i)=>{
@@ -213,36 +161,32 @@ function render(){
         ${r.data} ${r.hora}<br>
         ${r.telefone}<br>
         <button onclick='remover(${i})'>remover</button>
+        <button onclick='confirmarWhatsAppReserva(${i})' class='whatsapp'>WhatsApp</button>
       </div>`;
   });
 }
 
-function remover(i){
-  reservas.splice(i,1);
-  salvar();
-  render();
-  renderMesas();
-}
+// ==============================
+// REMOVER E LIMPAR
+// ==============================
+function remover(i){ reservas.splice(i,1); salvar(); render(); renderMesas(); }
+function limparReservas(){ reservas=[]; salvar(); render(); renderMesas(); }
 
-function limparReservas(){
-  reservas=[];
-  salvar();
-  render();
-  renderMesas();
+// ==============================
+// WHATSAPP PARA RESERVA EXISTENTE
+// ==============================
+function confirmarWhatsAppReserva(i){
+  const r = reservas[i]; // pega a reserva correspondente
+  const msg = `Confirmação de reserva:%0A
+Nome: ${r.nome}%0A
+Mesa: ${r.mesa}%0A
+Data: ${r.data}%0AHora: ${r.hora}%0APessoas: ${r.pessoas}%0AObservações: ${r.obs}`;
+  window.open(`https://wa.me/${r.telefone}?text=${msg}`);
 }
 
 // ==============================
-// WHATSAPP
+// INICIALIZAÇÃO
 // ==============================
-
-function confirmarWhatsApp(){
-  const msg=`Confirmação de reserva:%0A
-Nome: ${nome.value}%0A
-Mesa: ${mesa.value}%0A
-Data: ${data.value}%0AHora: ${hora.value}`;
-  window.open(`https://wa.me/${telefone.value}?text=${msg}`);
-}
-
 render();
 renderMesas();
 
