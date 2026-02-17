@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sistema Profissional de Reservas</title>
   <link rel="stylesheet" href="estilo/style.css">
-
 </head>
 <body>
 
@@ -14,23 +13,54 @@
   <p>Sistema profissional de reservas</p>
 </header>
 
+<nav>
+  <button onclick="mostrarAba('produtos')">Menu da Casa</button>
+  <button onclick="mostrarAba('cliente')">Reserva Online</button>
+  <button onclick="mostrarAba('admin')">Administrador</button>
+</nav>
+
 <div class="container">
 
-  <!-- LOGIN ADMINISTRADORES -->
+  <!-- MENU DA CASA -->
+  <div class="card" id="areaProdutos" style="display:none">
+    <h2>Cardápio do Restaurante</h2>
+    <p>Conheça os nossos pratos especiais</p>
+    <div id="produtosLista" class="produtos-grid"></div>
+  </div>
+
+  <!-- RESERVA ONLINE -->
+  <div class="card" id="areaCliente" style="display:none">
+    <h2>Reserva Online</h2>
+    <form id="formCliente">
+      <input type="text" id="c_nome" placeholder="Seu Nome" required>
+      <input type="tel" id="c_telefone" placeholder="Telefone com código do país" required>
+      <input type="date" id="c_data" required>
+      <input type="time" id="c_hora" required>
+      <select id="mesaSelect" required></select>
+      <select id="c_pessoas">
+        <option>1 Pessoa</option>
+        <option>2 Pessoas</option>
+        <option>3 Pessoas</option>
+        <option>4 Pessoas</option>
+        <option>5+</option>
+      </select>
+      <textarea id="c_obs" placeholder="Observações"></textarea>
+      <button class="full">Confirmar Reserva</button>
+    </form>
+    <div id="mesasClienteVisual"></div>
+  </div>
+
+  <!-- LOGIN ADMIN -->
   <div class="card" id="loginCard">
     <h2>Login Administrador</h2>
-    <p>Pode haver vários administradores com utilizador e senha diferentes</p>
     <input type="text" id="user" placeholder="Usuário" />
     <input type="password" id="pass" placeholder="Senha" />
     <button onclick="login()">Entrar</button>
   </div>
 
-  <!-- SISTEMA -->
+  <!-- SISTEMA ADMIN -->
   <div id="sistema" style="display:none">
-
     <div class="grid">
-
-      <!-- FORMULÁRIO -->
       <div class="card">
         <h2>Nova Reserva</h2>
         <form id="formReserva">
@@ -38,7 +68,6 @@
           <input type="tel" id="telefone" placeholder="Telefone" required />
           <input type="date" id="data" required />
           <input type="time" id="hora" required />
-
           <select id="pessoas">
             <option>1</option>
             <option>2</option>
@@ -46,153 +75,223 @@
             <option>4</option>
             <option>5+</option>
           </select>
-
-          <select id="mesa">
-            <option value="Mesa 1">Mesa 1</option>
-            <option value="Mesa 2">Mesa 2</option>
-            <option value="Mesa 3">Mesa 3</option>
-            <option value="Mesa 4">Mesa 4</option>
-            <option value="Mesa 5">Mesa 5</option>
-          </select>
-
+          <select id="mesa"></select>
           <textarea id="obs" class="full" placeholder="Observações"></textarea>
-
           <button class="full">Salvar Reserva</button>
         </form>
       </div>
 
-      <!-- MESAS -->
       <div class="card">
         <h2>Mesas Disponíveis</h2>
         <div id="mesas"></div>
       </div>
 
-      <!-- PAINEL -->
       <div class="card full">
         <h2>Reservas</h2>
         <div id="listaReservas"></div>
         <button class="danger" onclick="limparReservas()">Apagar tudo</button>
       </div>
-
     </div>
-
   </div>
 
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", function(){
 
-// ==============================
-// LISTA DE ADMINISTRADORES
-// ==============================
-const administradores = [
-  {user:'adolfo tchipilica', pass:'1234'},
-  {user:'ariclenes garcia', pass:'1234'},
-  {user:'buensi kimbonza', pass:'1234'},
-  {user:'cristiano de mascarenhas', pass:'1234'},
-  {user:'luana ariela', pass:'1234'},
-   {user:'nadia real', pass:'1234'},
-  {user:'carlos manuel', pass:'1234'}
-];
+  // ELEMENTOS
+  const loginCard = document.getElementById("loginCard");
+  const sistema = document.getElementById("sistema");
+  const areaCliente = document.getElementById("areaCliente");
+  const areaProdutos = document.getElementById("areaProdutos");
+  const formReserva = document.getElementById("formReserva");
+  const formCliente = document.getElementById("formCliente");
+  const listaReservas = document.getElementById("listaReservas");
+  const mesasDivAdmin = document.getElementById("mesas");
+  const mesaSelectCliente = document.getElementById("mesaSelect");
+  const mesasClienteVisual = document.getElementById("mesasClienteVisual");
+  const produtosLista = document.getElementById("produtosLista");
 
-// ==============================
-// LOGIN
-// ==============================
-function login(){
-  const usuario = user.value;
-  const senha = pass.value;
-  const autorizado = administradores.find(a => a.user === usuario && a.pass === senha);
-  if(autorizado){
-    loginCard.style.display='none';
-    sistema.style.display='block';
-  }else{
-    alert('Login inválido');
+  // ADMINISTRADORES
+  const administradores = [
+    {user:'adolfo tchipilica', pass:'1234'},
+    {user:'ariclenes garcia', pass:'1234'},
+    {user:'buensi kimbonza', pass:'1234'},
+    {user:'cristiano de mascarenhas', pass:'1234'},
+    {user:'luana ariela', pass:'1234'},
+    {user:'nadia real', pass:'1234'},
+    {user:'carlos manuel', pass:'1234'}
+  ];
+
+  // MESAS
+  const mesas = ['Mesa 1','Mesa 2','Mesa 3','Mesa 4','Mesa 5','Mesa 6','Mesa 7','Mesa 8','Mesa 9','Mesa 10'];
+
+  // RESERVAS
+  let reservas = JSON.parse(localStorage.getItem('reservas')) || [];
+  function salvar(){ localStorage.setItem('reservas', JSON.stringify(reservas)); }
+
+  // ABAS
+  window.mostrarAba = function(tipo){
+    areaCliente.style.display = "none";
+    areaProdutos.style.display = "none";
+    loginCard.style.display = "none";
+    sistema.style.display = "none";
+    if(tipo==="cliente") areaCliente.style.display="block";
+    else if(tipo==="produtos") areaProdutos.style.display="block";
+    else loginCard.style.display="block";
   }
-}
 
-// ==============================
-// RESERVAS LOCAL
-// ==============================
-let reservas = JSON.parse(localStorage.getItem('reservas')) || [];
-function salvar(){ localStorage.setItem('reservas', JSON.stringify(reservas)); }
+  // LOGIN
+  window.login = function(){
+    const usuario = document.getElementById("user").value.toLowerCase().trim();
+    const senha = document.getElementById("pass").value.trim();
+    const autorizado = administradores.find(a => a.user.toLowerCase()===usuario && a.pass===senha);
+    if(autorizado){
+      loginCard.style.display="none";
+      sistema.style.display="block";
+      renderMesas();
+      render();
+    } else alert("Login inválido");
+  }
 
-// ==============================
-// MESAS
-// ==============================
-function renderMesas(){
-  const div = document.getElementById('mesas');
-  div.innerHTML='';
-  ['Mesa 1','Mesa 2','Mesa 3','Mesa 4','Mesa 5'].forEach(m=>{
-    const ocupado = reservas.find(r=>r.mesa===m);
-    const el=document.createElement('div');
-    el.className='mesa '+(ocupado?'ocupada':'');
-    el.innerText=m+(ocupado?' (ocupada)':'');
-    div.appendChild(el);
+  // RENDERIZA MESAS
+  function renderMesas(){
+    mesasDivAdmin.innerHTML = "";
+    const select = document.getElementById("mesa");
+    select.innerHTML = "";
+    mesas.forEach(m => {
+      const ocupado = reservas.find(r => r.mesa===m);
+      const div = document.createElement("div");
+      div.className = "mesa "+(ocupado?"ocupada":"");
+      div.innerText = m + (ocupado?" (ocupada)":" (livre)");
+      mesasDivAdmin.appendChild(div);
+
+      const option = document.createElement("option");
+      option.value = m;
+      option.innerText = m + (ocupado?" (ocupada)":"");
+      select.appendChild(option);
+    });
+  }
+
+  function renderMesasCliente(){
+    mesaSelectCliente.innerHTML = '<option value="">Selecione a Mesa</option>';
+    mesasClienteVisual.innerHTML = "";
+    const data = document.getElementById("c_data").value;
+    const hora = document.getElementById("c_hora").value;
+    mesas.forEach(m => {
+      const ocupado = reservas.find(r => r.mesa===m && r.data===data && r.hora===hora);
+      const div = document.createElement("div");
+      div.className = "mesa "+(ocupado?"ocupada":"");
+      div.innerText = m + (ocupado?" (Ocupada)":" (Livre)");
+      mesasClienteVisual.appendChild(div);
+
+      const option = document.createElement("option");
+      option.value = m;
+      option.innerText = m + (ocupado?" - Ocupada":" - Livre");
+      if(ocupado) option.disabled=true;
+      mesaSelectCliente.appendChild(option);
+    });
+  }
+
+  // RENDER RESERVAS
+  function render(){
+    listaReservas.innerHTML="";
+    reservas.forEach((r,i)=>{
+      listaReservas.innerHTML += `
+        <div class='mesa'>
+          <b>${r.nome}</b> - ${r.mesa || ""}<br>
+          ${r.data} ${r.hora}<br>
+          ${r.telefone}<br>
+          <button onclick='remover(${i})'>Remover</button>
+          <button onclick='confirmarWhatsAppReserva(${i})' class='whatsapp'>WhatsApp</button>
+        </div>`;
+    });
+  }
+
+  window.remover = function(i){ reservas.splice(i,1); salvar(); render(); renderMesas(); renderMesasCliente(); }
+
+  window.confirmarWhatsAppReserva = function(i){
+    const r = reservas[i];
+    const msg = `Confirmação de reserva:%0ANome: ${r.nome}%0AMesa: ${r.mesa || ""}%0AData: ${r.data}%0AHora: ${r.hora}%0APessoas: ${r.pessoas}%0AObservações: ${r.obs || ""}`;
+    window.open(`https://wa.me/${r.telefone}?text=${msg}`);
+  }
+
+  window.limparReservas = function(){ reservas=[]; salvar(); render(); renderMesas(); renderMesasCliente(); }
+
+  // NOVA RESERVA ADMIN
+  formReserva.addEventListener('submit', e=>{
+    e.preventDefault();
+    const r = {
+      nome: document.getElementById("nome").value,
+      telefone: document.getElementById("telefone").value,
+      data: document.getElementById("data").value,
+      hora: document.getElementById("hora").value,
+      pessoas: document.getElementById("pessoas").value,
+      mesa: document.getElementById("mesa").value,
+      obs: document.getElementById("obs").value
+    };
+    reservas.push(r); salvar(); render(); renderMesas();
+    formReserva.reset();
   });
-}
 
-// ==============================
-// NOVA RESERVA
-// ==============================
-formReserva.addEventListener('submit',e=>{
-  e.preventDefault();
-  const r={
-    nome:nome.value,
-    telefone:telefone.value,
-    data:data.value,
-    hora:hora.value,
-    pessoas:pessoas.value,
-    mesa:mesa.value,
-    obs:obs.value
-  };
-  reservas.push(r);
-  salvar();
+  // RESERVA CLIENTE
+  formCliente.addEventListener('submit', e=>{
+    e.preventDefault();
+    const reserva = {
+      nome: document.getElementById("c_nome").value,
+      telefone: document.getElementById("c_telefone").value,
+      data: document.getElementById("c_data").value,
+      hora: document.getElementById("c_hora").value,
+      pessoas: document.getElementById("c_pessoas").value,
+      mesa: mesaSelectCliente.value,
+      obs: document.getElementById("c_obs").value
+    };
+    if(!reserva.mesa){ alert("Selecione uma mesa!"); return; }
+    reservas.push(reserva); salvar(); render(); renderMesasCliente();
+    const msg = `🍽️ RESERVA CONFIRMADA!\nNome: ${reserva.nome}\nMesa: ${reserva.mesa}\nData: ${reserva.data}\nHora: ${reserva.hora}\nPessoas: ${reserva.pessoas}\nObservações: ${reserva.obs || "N/A"}`;
+    window.open(`https://wa.me/${reserva.telefone}?text=${encodeURIComponent(msg)}`);
+    alert("Reserva confirmada! Você receberá confirmação no WhatsApp.");
+    formCliente.reset();
+  });
+
+  document.getElementById("c_data").addEventListener("change", renderMesasCliente);
+  document.getElementById("c_hora").addEventListener("change", renderMesasCliente);
+
+  // PRODUTOS
+  const listaProdutos = [
+    {nome:"Frango Grelhado Especial", preco:"2500 Kz", categoria:"Prato Principal", descricao:"Frango grelhado no carvão com arroz e batata frita.", img:"https://images.unsplash.com/photo-1604908176997-43198c3a8b16"},
+    {nome:"Bife à Casa Premium", preco:"3500 Kz", categoria:"Prato Principal", descricao:"Bife suculento ao ponto com molho especial.", img:"https://images.unsplash.com/photo-1558030006-450675393462"},
+    {nome:"Hambúrguer Artesanal", preco:"2800 Kz", categoria:"Prato Principal", descricao:"Hambúrguer artesanal 180g com queijo cheddar, alface, tomate e molho especial.", img:"https://images.unsplash.com/photo-1550547660-d9450f859349"},
+    {nome:"Pizza Margherita", preco:"3000 Kz", categoria:"Prato Principal", descricao:"Pizza tradicional com molho de tomate, mozzarella fresca e manjericão.", img:"https://images.unsplash.com/photo-1548365328-9f547fb0953c"},
+    {nome:"Esparguete à Bolonhesa", preco:"2700 Kz", categoria:"Prato Principal", descricao:"Massa italiana com molho bolonhesa caseiro e queijo parmesão.", img:"https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5"},
+    {nome:"Salada Caesar", preco:"2200 Kz", categoria:"Entrada", descricao:"Salada fresca com frango grelhado, croutons e molho Caesar.", img:"https://images.unsplash.com/photo-1550304943-4f24f54ddde9"}
+  ];
+
+  function renderProdutos(){
+    produtosLista.innerHTML="";
+    listaProdutos.forEach(p=>{
+      const card = document.createElement("div");
+      card.className="produto-card";
+      card.innerHTML = `
+        <img src="${p.img}" alt="${p.nome}">
+        <div class="produto-info">
+          <h3>${p.nome}</h3>
+          <p><strong>Categoria:</strong> ${p.categoria}</p>
+          <p>${p.descricao}</p>
+          <p class="preco">${p.preco}</p>
+        </div>
+      `;
+      produtosLista.appendChild(card);
+    });
+  }
+
+  renderProdutos();
+  mostrarAba("produtos");
   render();
   renderMesas();
-  formReserva.reset();
+  renderMesasCliente();
+
 });
-
-// ==============================
-// LISTAR RESERVAS COM BOTÃO WHATSAPP
-// ==============================
-function render(){
-  listaReservas.innerHTML='';
-  reservas.forEach((r,i)=>{
-    listaReservas.innerHTML+=`
-      <div class='mesa'>
-        <b>${r.nome}</b> - ${r.mesa}<br>
-        ${r.data} ${r.hora}<br>
-        ${r.telefone}<br>
-        <button onclick='remover(${i})'>remover</button>
-        <button onclick='confirmarWhatsAppReserva(${i})' class='whatsapp'>WhatsApp</button>
-      </div>`;
-  });
-}
-
-// ==============================
-// REMOVER E LIMPAR
-// ==============================
-function remover(i){ reservas.splice(i,1); salvar(); render(); renderMesas(); }
-function limparReservas(){ reservas=[]; salvar(); render(); renderMesas(); }
-
-// ==============================
-// WHATSAPP PARA RESERVA EXISTENTE
-// ==============================
-function confirmarWhatsAppReserva(i){
-  const r = reservas[i]; // pega a reserva correspondente
-  const msg = `Confirmação de reserva:%0A
-Nome: ${r.nome}%0A
-Mesa: ${r.mesa}%0A
-Data: ${r.data}%0AHora: ${r.hora}%0APessoas: ${r.pessoas}%0AObservações: ${r.obs}`;
-  window.open(`https://wa.me/${r.telefone}?text=${msg}`);
-}
-
-// ==============================
-// INICIALIZAÇÃO
-// ==============================
-render();
-renderMesas();
-
 </script>
 
 </body>

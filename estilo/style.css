@@ -2,17 +2,6 @@
 /* CSS SIMPLES E EXPLICADO */
  
 
-    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif
-    }
-
-    body{
-        background:#f4f4f4;color:#333
-    }
-
-    header{
-        background:#8b0000;color:#fff;padding:20px;text-align:center
-    }
-
     .container{
         max-width:1200px;margin:20px auto;padding:20px
     }
@@ -62,4 +51,280 @@
 
 
     @media(max-width:768px){.grid{grid-template-columns:1fr}form{grid-template-columns:1fr}}
+
+
+#mesasClienteVisual{
+  margin: 3%;
+ }
+
+/* ==============================
+   RESET
+============================== */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Segoe UI', sans-serif;
+}
+
+body{
+  background:linear-gradient(135deg,#111,#1c1c1c);
+  color:#fff;
+}
+
+/* ==============================
+   HEADER
+============================== */
+header{
+  background:linear-gradient(90deg,#c0392b,#e74c3c);
+  padding:25px;
+  text-align:center;
+  box-shadow:0 4px 20px rgba(0,0,0,0.5);
+}
+
+header h1{
+  font-size:32px;
+  letter-spacing:2px;
+}
+
+/* ==============================
+   NAVEGAÇÃO
+============================== */
+nav{
+  text-align:center;
+  margin:20px 0;
+}
+
+nav button{
+  padding:10px 25px;
+  margin:10px;
+  border:none;
+  border-radius:30px;
+  cursor:pointer;
+  background:#e74c3c;
+  color:#fff;
+  font-weight:bold;
+  transition:0.3s;
+}
+
+nav button:hover{
+  background:#c0392b;
+  transform:scale(1.1);
+}
+
+/* ==============================
+   LAYOUT
+============================== */
+.container{
+  width:95%;
+  max-width:1200px;
+  margin:auto;
+}
+
+.grid{
+  display:grid;
+  gap:20px;
+}
+
+/* ==============================
+   CARD
+============================== */
+.card{
+  background:#222;
+  padding:25px;
+  border-radius:15px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.6);
+  margin-bottom:20px;
+  animation:fadeIn 0.6s ease-in-out;
+}
+
+.card h2{
+  margin-bottom:15px;
+  color:#e74c3c;
+}
+
+.card p{
+  margin-bottom:15px;
+}
+
+/* ==============================
+   FORMULÁRIOS
+============================== */
+input, select, textarea{
+  width:100%;
+  padding:12px;
+  margin-bottom:12px;
+  border-radius:10px;
+  border:none;
+  background:#333;
+  color:#fff;
+}
+
+input:focus, select:focus, textarea:focus{
+  outline:none;
+  border:2px solid #e74c3c;
+}
+
+/* ==============================
+   BOTÕES
+============================== */
+button{
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  background:#e74c3c;
+  color:#fff;
+  font-weight:bold;
+  transition:0.3s;
+}
+
+button:hover{
+  background:#c0392b;
+  transform:translateY(-2px);
+}
+
+.whatsapp{
+  background:#25D366;
+}
+
+.whatsapp:hover{
+  background:#1ebc59;
+}
+
+.danger{
+  background:#b71c1c;
+}
+
+.danger:hover{
+  background:#7f0000;
+}
+
+/* ==============================
+   MESAS
+============================== */
+.mesa{
+  background:#333;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:10px;
+  transition:0.3s;
+}
+
+.mesa:hover{
+  background:#444;
+  transform:scale(1.03);
+}
+
+.ocupada{
+  background:#7f0000 !important;
+}
+
+/* ==============================
+   PRODUTOS
+============================== */
+.produtos-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+  padding-top:20px;
+}
+
+.produto-card{
+  background:#2c2c2c;
+  border-radius:15px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:0.3s;
+  box-shadow:0 5px 15px rgba(0,0,0,0.4);
+}
+
+.produto-card:hover{
+  transform:scale(1.05);
+}
+
+.produto-card img{
+  width:100%;
+  height:180px;
+  object-fit:cover;
+}
+
+.produto-info{
+  padding:15px;
+}
+
+.produto-info h3{
+  color:#e74c3c;
+}
+
+.preco{
+  font-weight:bold;
+  color:#2ecc71;
+  margin-top:10px;
+}
+
+/* ==============================
+   MODAL
+============================== */
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.8);
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+}
+
+.modal-content{
+  background:#222;
+  padding:25px;
+  border-radius:15px;
+  max-width:500px;
+  width:90%;
+  text-align:center;
+  animation:fadeIn 0.4s ease;
+}
+
+.modal-content img{
+  width:100%;
+  height:250px;
+  object-fit:cover;
+  border-radius:10px;
+}
+
+.fechar{
+  float:right;
+  font-size:25px;
+  cursor:pointer;
+  color:#fff;
+}
+
+/* ==============================
+   NOTIFICAÇÃO
+============================== */
+.notificacao{
+  position:fixed;
+  top:20px;
+  right:20px;
+  background:#2ecc71;
+  padding:15px 25px;
+  border-radius:10px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.4);
+  animation:slideIn 0.5s ease;
+  z-index:999;
+}
+
+/* ==============================
+   ANIMAÇÕES
+============================== */
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+@keyframes slideIn{
+  from{transform:translateX(100%);}
+  to{transform:translateX(0);}
+}
 
